@@ -1,0 +1,10 @@
+{
+  "dependencies": [
+    "arrow",
+    "azure-identity-cpp",
+    "azure-security-keyvault-secrets-cpp",
+    "azure-storage-blobs-cpp",
+    "fmt",
+    "glfw3"
+  ]
+}
