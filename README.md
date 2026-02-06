@@ -5,12 +5,12 @@ and storing that data in a parquet file which is then sent to an Azure Blob Cont
 are in your network as well as the channels, triggers, pre/post recording duration and other settings which are available on each node.
 
 ## Building 
-Building this project is going to be a painful experience, and you have been warned, so please proceed at your own risk ;). I haven't included all of the dependencies necessary to build the project since:
-a) This repo will be massive
+Building this project is going to be a painful experience, and you have been warned, so please proceed at your own risk ;). I haven't included all of the dependencies necessary to build the project since:  
+a) This repo will be massive  
 b) Most of these dependencies need to be built manually since they're outdated and aren't readily available on most package repos
 
 The dependencies which are still available and modern C++ package repos are included in the `vcpkg.json` file and if you have vcpkg [installed](https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell)
-then all you will need to do to install these dependencies is run `vcpkg install`.
+then all you need to do to install these dependencies is run `vcpkg install`.
 
 The dependencies which need to be installed manually are the following
 - [Boost](https://www.boost.org/releases/1.68.0/) == 1.68
@@ -20,7 +20,7 @@ The dependencies which need to be installed manually are the following
 Once you've built these libraries then please put all of the libraries and header files produced
 from MSCL into the `MSCL` folder and the same for boost under the `boost` folder.
 
-You can then run `build.sh` and hopefully it will make some binaries!
+You can then run `build.sh` and hopefully it will output some binaries!
 
 ## Running 
 After building the project:
