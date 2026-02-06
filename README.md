@@ -20,10 +20,10 @@ The dependencies which need to be installed manually are the following
 Once you've built these libraries then please put all of the libraries and header files produced
 from MSCL into the `MSCL` folder and the same for boost under the `boost` folder.
 
-You can then run `build.sh` and hopefully it will output some binaries!
+You can then run `./build.sh` and hopefully it will output some binaries!
 
 ## Running 
 After building the project:
 
-- To run the main sensor collection program run `run_server.sh`
-- To run the settings menu run `run_client.sh` (the settings menu will not show until the main program has connnected to all of the sensors)
+- To run the main sensor collection program run `./run_server.sh`
+- To run the settings menu run `./run_client.sh` (the settings menu will not show until the main program has connnected to all of the sensors)
