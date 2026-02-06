@@ -2,7 +2,7 @@
 
 This project was made for the purpose of recording the data being collected by the [HBK G-Link](https://www.hbkworld.com/en/products/instruments/wireless-daq-systems/wireless-nodes/g-link-200)
 and storing that data in a parquet file which is then sent to an Azure Blob Container. The project also contains a settings UI which will allow you to configure which wireless nodes
-are in your network as well as the channels and triggers which are enabled on each node.
+are in your network as well as the channels, triggers, pre/post recording duration and other settings which are available on each node.
 
 ## Building 
 Building this project is going to be a painful experience, and you have been warned, so please proceed at your own risk ;). I haven't included all of the dependencies necessary to build the project since:
