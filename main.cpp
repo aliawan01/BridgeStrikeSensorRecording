@@ -315,6 +315,12 @@ int main(void) {
   std::vector<std::vector<uint64_t>> nodes_timestamp_array;
   std::unordered_map<std::string, std::vector<std::vector<float>>> nodes_reading_dict = {};
 
+  std::vector<std::string> channel_description_array;
+  std::vector<char*>       channel_description_c_string_array;
+  std::vector<uint8_t>     trigger_enabled_array;
+  std::vector<uint32_t>    trigger_pre_post_duration_array;
+  std::vector<float>       trigger_value_array;
+
   SaveData save_data = {
     std::atomic<bool>{false},
     2000,
@@ -346,6 +352,7 @@ int main(void) {
     }
 
     mscl::BaseStation base_station = *base_station_ptr;
+    fmt::print("Base station frequency: {}\n", (int)base_station.frequency());
 
     //base_station.enableBeacon();
     setup_nodes:
@@ -540,7 +547,7 @@ int main(void) {
           fmt::print("post duration normalized: {}\n", wireless_node_features.normalizeEventDuration(sensor_config.trigger_pre_post_duration_array[(i*2)+1]));
 
           event_trigger_options.preDuration(wireless_node_features.normalizeEventDuration(sensor_config.trigger_pre_post_duration_array[i*2]));
-          event_trigger_options.preDuration(wireless_node_features.normalizeEventDuration(sensor_config.trigger_pre_post_duration_array[(i*2)+1]));
+          event_trigger_options.postDuration(wireless_node_features.normalizeEventDuration(sensor_config.trigger_pre_post_duration_array[(i*2)+1]));
 
           for (int channel_base_index = 0; channel_base_index < sensor_config.num_of_channels_available; channel_base_index++) {
             if (sensor_config.trigger_enabled_array[(sensor_config.num_of_channels_available*i)+channel_base_index]) {
@@ -549,6 +556,7 @@ int main(void) {
 
               trigger.channelNumber(channel_base_index+1);
               trigger.triggerType(mscl::WirelessTypes::eventTrigger_ceiling);
+              fmt::print("i: {}, Trigger value: {}\n", i, sensor_config.trigger_value_array[(sensor_config.num_of_channels_available*i)+channel_base_index]);
               trigger.triggerValue(sensor_config.trigger_value_array[(sensor_config.num_of_channels_available*i)+channel_base_index]);
             }
             else {
@@ -567,14 +575,27 @@ int main(void) {
       network.addNode(wireless_node);
     }
 
+    if (wireless_nodes_array.empty()) {
+      fmt::print("Failed to connect to any nodes, exiting.\n");
+      return -1;
+    }
+
     if (!setup_initial_sensor_config) {
       setup_initial_sensor_config = true;
       sensor_config.num_of_channels_available = 100;
 
-      std::vector<std::string> channel_description_array;
-      std::vector<uint8_t>     trigger_enabled_array;
-      std::vector<uint32_t>    trigger_pre_post_duration_array;
-      std::vector<float>       trigger_value_array;
+      free(sensor_config.node_address_array);
+      sensor_config.node_address_count = wireless_nodes_array.size();
+      sensor_config.node_address_array = (uint32_t*)malloc(sizeof(*sensor_config.node_address_array) * sensor_config.node_address_count);
+      for (int i = 0; i < wireless_nodes_array.size(); i++) {
+        sensor_config.node_address_array[i] = wireless_nodes_array[i].nodeAddress();
+      }
+
+      channel_description_array.clear();
+      channel_description_c_string_array.clear();
+      trigger_enabled_array.clear();
+      trigger_pre_post_duration_array.clear();
+      trigger_value_array.clear();
 
       for (int wireless_node_index = 0; wireless_node_index < wireless_nodes_array.size(); wireless_node_index++) {
         auto& wireless_node = wireless_nodes_array[wireless_node_index];
@@ -639,7 +660,6 @@ int main(void) {
         }
       }
 
-      std::vector<char*> channel_description_c_string_array;
       for (auto& description : channel_description_array) {
         channel_description_c_string_array.push_back(const_cast<char*>(description.c_str()));
       }
@@ -697,7 +717,7 @@ int main(void) {
           }
         }
 
-        if (invalid_node_index != sensor_config.node_address_count-1) {
+        if (invalid_node_index < sensor_config.node_address_count-1 && invalid_node_index != -1) {
           memmove(
               sensor_config.node_address_array+invalid_node_index, 
               sensor_config.node_address_array+invalid_node_index+1,
@@ -718,7 +738,7 @@ int main(void) {
 
           memmove(
               sensor_config.trigger_pre_post_duration_array+(invalid_node_index*2),
-              sensor_config.trigger_pre_post_duration_array+(invalid_node_index*3),
+              sensor_config.trigger_pre_post_duration_array+((invalid_node_index+1)*2),
               sizeof(*sensor_config.trigger_pre_post_duration_array)*((sensor_config.node_address_count*2)-((invalid_node_index+1)*2))
           );
 
@@ -729,8 +749,10 @@ int main(void) {
           );
         }
 
-        sensor_config.node_address_count -= 1;
-        sensor_config.enabled_channels_count -= sensor_config.num_of_channels_available;
+        if (invalid_node_index != -1) {
+          sensor_config.node_address_count -= 1;
+          sensor_config.enabled_channels_count -= sensor_config.num_of_channels_available;
+        }
       }
 
       sensor_config.error_string = const_cast<char*>(error_string.c_str());
